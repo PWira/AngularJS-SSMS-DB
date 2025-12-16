@@ -3,7 +3,6 @@ const API_KEY = "Backend_test_key_456";
 
 angular.module("employeeApp")
 .service("EmployeeService", function($http) {
-    const API = "http://localhost:3000/api/employees";
 
     return {
         getAll: function(page = 1, limit = 10) {
