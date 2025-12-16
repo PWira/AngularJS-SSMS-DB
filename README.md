@@ -68,17 +68,17 @@ http://localhost:3000
 📂 Struktur Folder
 ```plaintext
 ├── backend/
-│   ├── middleware/    # Proteksi Auth & API Key
-│   ├── routes/        # Endpoint API (Employees, Dept, dll)
-│   ├── database.sql   # Script untuk setup MSSQL
-│   ├── db.js          # connector ke database
-│   ├── server.js      # File utama server Node.js
-│   └── .env           # Konfigurasi rahasia (Database & Key)
+│   ├── middleware/         # Proteksi Auth & API Key
+│   ├── routes/             # Endpoint API (Employees, Dept, dll)
+│   ├── db_employeees.sql   # Script untuk setup MSSQL
+│   ├── db.js               # connector ke database
+│   ├── server.js           # File utama server Node.js
+│   └── .env                # Konfigurasi rahasia (Database & Key)
 ├── frontend/
-│   ├── app.js         # Logic AngularJS (Controller & Service)
-│   ├── index.html     # Tampilan Utama
-│   └── style.css      # Styling Custom
-└── .gitignore         # .gitignore
+│   ├── app.js              # Logic AngularJS (Controller & Service)
+│   ├── index.html          # Tampilan Utama
+│   └── style.css           # Styling Custom
+└── .gitignore              # .gitignore
 ```
 
 🔒 Keamanan (Security)
