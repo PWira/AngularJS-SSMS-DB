@@ -70,6 +70,7 @@ http://localhost:3000
 ├── backend/
 │   ├── middleware/    # Proteksi Auth & API Key
 │   ├── routes/        # Endpoint API (Employees, Dept, dll)
+│   ├── database.sql   # Script untuk setup MSSQL
 │   ├── db.js          # connector ke database
 │   ├── server.js      # File utama server Node.js
 │   └── .env           # Konfigurasi rahasia (Database & Key)
@@ -77,7 +78,7 @@ http://localhost:3000
 │   ├── app.js         # Logic AngularJS (Controller & Service)
 │   ├── index.html     # Tampilan Utama
 │   └── style.css      # Styling Custom
-└── database.sql       # Script untuk setup MSSQL
+└── .gitignore         # .gitignore
 ```
 
 🔒 Keamanan (Security)
