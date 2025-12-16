@@ -41,11 +41,11 @@ Salin dan sesuaikan konfigurasi berikut ke dalam file `.env`:
 DB_USER=isi_username_sql_anda
 DB_PASSWORD=isi_password_sql_anda
 DB_SERVER=localhost
-DB_DATABASE=EmployeeDB
+DB_DATABASE=isi_nama_database_anda
 
 # Security
-API_KEY=secret135
-PORT=1433
+API_KEY=isi_api_key_teraman_anda
+DB_PORT=1433
 ```
 
 Buka file app.js di sisi frontend, pastikan variabel API_KEY sudah sesuai dengan yang ada di file .env.
