@@ -48,7 +48,7 @@ router.get("/", async (req, res) => {
         console.log("Fetched employee data successfully");
 
     } catch (err) {
-        console.error("Database error:"); 
+        console.error("Database error"); 
         res.status(500).json({ error: "Gagal memuat data karyawan." });
     }
 });
@@ -85,7 +85,7 @@ router.get("/search", async (req, res) => {
         console.log("Search completed successfully");
 
     } catch (err) {
-        console.error("Search error:");
+        console.error("Search error");
         res.status(500).json({ error: "Gagal mencari data" });
     }
 });
@@ -113,6 +113,7 @@ router.get("/department", async (req, res) => {
     res.json(result.recordset);
     console.log("Fetched employees by department successfully");
     } catch (err) {
+    console.error("Error fetching by department");
     res.status(500).json({ error: "Invalid Department ID" });
     }
 });
@@ -141,6 +142,7 @@ router.get("/:id", async (req, res) => {
     res.json(result.recordset[0]);
     console.log("Fetched employee by ID successfully");
     } catch (err) {
+    console.error("Error fetching by ID");
     res.status(500).json({ error: "Invalid ID" });
     }
 });
@@ -173,6 +175,7 @@ router.post("/", async (req, res) => {
         res.status(201).json({ EmployeeID: result.recordset[0].EmployeeID });
         console.log("Inserted new employee successfully");
     } catch (err) {
+        console.error("Error inserting new employee");
         res.status(500).json({ error: "Data Tidak sesuai!" });
     }
 });
@@ -218,6 +221,7 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Employee deleted successfully" });
     console.log("Deleted employee successfully");
     } catch (err) {
+        console.error("Error deleting employee");
     res.status(500).json({ error: "Delete Data Gagal" });
     }
 });

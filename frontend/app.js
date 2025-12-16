@@ -80,7 +80,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
     };
 
     $scope.findEmployeeName = (name) => {
-        $scope.searchName = name || "";
+        $scope.searchName = (name) ? name.trim() : "";
         if (!$scope.searchName) {
             $scope.currentPage = 1;
             $location.search({ page: 1, limit: $scope.limit });

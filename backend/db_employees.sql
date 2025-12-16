@@ -97,7 +97,7 @@ SELECT * FROM Departments;
 
 SELECT 
 	e.Name,
-    d.DepartmentName,
+    d.DepartmentName AS DepartmentName,
     e.Position,
     e.Salary
 FROM Employees e
