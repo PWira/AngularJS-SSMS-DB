@@ -36,8 +36,6 @@ angular.module("employeeApp")
                 return Promise.reject({ message: "Employee ID is required" });
             }
             
-            // console.log("Updating employee ID:", employee.EmployeeID); // DEBUG
-            
             return $http.put(`${API}/${employee.EmployeeID}`, {
                 Name: employee.Name,
                 DepartmentID: employee.DepartmentID,

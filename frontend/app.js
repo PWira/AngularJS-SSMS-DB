@@ -48,17 +48,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             params.nama = $scope.searchName;
         }else if ($scope.searchDepartmentID) {
             params.department = $scope.searchDepartmentID;
-        // }else {
-        //     switch ($scope.isEdit) {
-        //         case true:
-        //             params.editing = $scope.form.EmployeeID;
-        //         case false:
-        //             params.add_new = "add_new";
-        //         case '':
-        //             console.error("Undifined state");
-        //             refreshData(); 
-        //             break;
-        //     }
         }
         
         $location.search(params);
@@ -87,7 +76,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                 ...$location.search(), 
                 page: page 
             });
-            // DepartmentID search pagination
             if ($scope.searchDepartmentID) {
                 EmployeeService.getDepartmentId($scope.searchDepartmentID, page, $scope.limit)
                     .then(res => {
@@ -102,7 +90,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                         console.error("Error pagination:", err);
                     });
             } 
-            // Search by name pagination
             else if ($scope.searchName) {
                 EmployeeService.search($scope.searchName, page, $scope.limit)
                     .then(res => {
@@ -117,7 +104,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                         console.error("Error pagination:", err);
                     });
             }
-            // Normal pagination
             else {
                 updateURL();
                 refreshData();
@@ -191,22 +177,22 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             $scope.employees = [];
     };
 
-    // $scope.showEmployeeById = (filterID) => {
-    //     if (!filterID) {
-    //         $scope.currentPage = 1;
-    //         refreshData();
-    //         return;
-    //     }
-    //     EmployeeService.getById(filterID)
-    //         .then(res => {
-    //             $scope.employees = res.data ? [res.data] : [];
-    //             $scope.totalRecords = $scope.employees.length;
-    //             $scope.totalPages = 1;
-    //             $scope.pageNumbers = [1];
-    //             $scope.currentPage = 1;
-    //         })
-    //         .catch(err => { console.error("Gagal memuat data:", err); });
-    // };
+    $scope.showEmployeeById = (filterID) => {
+        if (!filterID) {
+            $scope.currentPage = 1;
+            refreshData();
+            return;
+        }
+        EmployeeService.getById(filterID)
+            .then(res => {
+                $scope.employees = res.data ? [res.data] : [];
+                $scope.totalRecords = $scope.employees.length;
+                $scope.totalPages = 1;
+                $scope.pageNumbers = [1];
+                $scope.currentPage = 1;
+            })
+            .catch(err => { console.error("Gagal memuat data:", err); });
+    };
 
     const urlParams = $location.search();
     if (urlParams.search) {
@@ -228,7 +214,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     // Form UPDATE
     $scope.showEditForm = (emp) => {
-        // console.log("Employee to edit:", emp); // DEBUG
         updateURL();
         $scope.view = 'form';
         $scope.isEdit = true;
@@ -240,16 +225,12 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             Salary: emp.Salary
         };
         
-        // console.log("Form after copy:", $scope.form); // DEBUG
     };
     $scope.backToList = () => {
         $scope.view = 'list';
     };
 
     $scope.saveEmployee = () => {
-        // console.log("Saving employee:", $scope.form); // DEBUG
-        // console.log("Is Edit:", $scope.isEdit); // DEBUG
-        
         if ($scope.isEdit) {
             if (!$scope.form.EmployeeID) {
                 alert("Error: Employee ID tidak ditemukan!");
@@ -267,7 +248,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                 })
                 .catch(err => {
                     console.error("Update error:");
-                    // alert("Gagal update: " + (err.data?.error || err.statusText));
                 });
         } else {
             // CREATE
@@ -280,7 +260,6 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                 })
                 .catch(err => {
                     console.error("Create error:");
-                    // alert("Gagal tambah data: " + (err.data?.error || err.statusText));
                 });
         }
     };
