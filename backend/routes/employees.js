@@ -274,7 +274,7 @@ router.post("/", async (req, res) => {
             .input("Name", sql.NVarChar, Name)
             .input("DepartmentID", sql.Int, DepartmentID)
             .input("Position", sql.NVarChar, Position)
-            .input("Salary", sql.Int, Salary)
+            .input("Salary", sql.Decimal(18, 2), Salary)
             .query(
                 `INSERT INTO Employees (Name, DepartmentID, Position, Salary) VALUES (@Name, @DepartmentID, @Position, @Salary); SELECT SCOPE_IDENTITY() AS EmployeeID;`
             );
@@ -301,7 +301,7 @@ router.put("/:id", async (req, res) => {
         .input("Name", sql.NVarChar, Name)
         .input("DepartmentID", sql.Int, DepartmentID)
         .input("Position", sql.NVarChar, Position)
-        .input("Salary", sql.Int, Salary)
+        .input("Salary", sql.Decimal(18, 2), Salary)
         .query(
             "UPDATE Employees SET Name = @Name, DepartmentID = @DepartmentID, Position = @Position, Salary = @Salary WHERE EmployeeID = @id"
         );
