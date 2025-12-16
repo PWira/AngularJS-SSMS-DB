@@ -2,14 +2,42 @@ const express = require("express");
 const router = express.Router();
 const { poolPromise, sql } = require("../db");
 
-// GET ALL
+// GET ALL WITH PAGINATION
 router.get("/", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query("SELECT * FROM Employees");
-        res.json(result.recordset);
+        
+        // Request COUNT
+        const countRequest = pool.request();
+        const totalResult = await countRequest.query("SELECT COUNT(*) AS totalRecords FROM Employees");
+        const totalRecords = totalResult.recordset[0].totalRecords;
+        
+        // Request DATA
+        const dataRequest = pool.request();
+        const paginatedQuery = `
+            SELECT * FROM Employees
+            ORDER BY EmployeeID 
+            OFFSET @offset ROWS 
+            FETCH NEXT @limit ROWS ONLY;
+        `;
+        
+        dataRequest.input('offset', offset);
+        dataRequest.input('limit', limit);
+        const dataResult = await dataRequest.query(paginatedQuery);
+        
+        res.json({
+            data: dataResult.recordset,
+            totalRecords: totalRecords,
+            currentPage: page,
+            totalPages: Math.ceil(totalRecords / limit)
+        });
+
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Database error:", err.message); 
+        res.status(500).json({ error: "Gagal memuat data karyawan." });
     }
 });
 
@@ -33,7 +61,7 @@ router.get("/:id", async (req, res) => {
 
 // INSERT NEW EMPLOYEE
 router.post("/", async (req, res) => {
-    const { Name, Position, Office, Salary } = req.body;
+    const { Name, Position, Salary } = req.body;
     try {
         const pool = await poolPromise;
         const result = await pool
@@ -53,7 +81,7 @@ router.post("/", async (req, res) => {
 // UPDATE EMPLOYEE DATA
 router.put("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
-    const { Name, Position, Office, Salary } = req.body;
+    const { Name, Position, Salary } = req.body;
     if (isNaN(id)) {
     return res.status(400).json({ error: "Invalid employee ID" });
     }
