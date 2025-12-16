@@ -19,13 +19,14 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3" ng-if="view === 'list'">
-    <div class="col-auto d-flex align-items-center"> <input type="number"
-        ng-model="filterId"
-        placeholder="Search by ID (Exact Match)"
-        class="form-control"
-        style="width:200px;">
+    <div class="col-auto d-flex align-items-center"> 
+        <input type="text" 
+            class="form-control" 
+            placeholder="Cari nama pegawai..." 
+            ng-model="searchName"
+            ng-keyup="$event.keyCode == 13 && findEmployeeName()">
 
-        <button class="btn btn-secondary ms-3" ng-click="showEmployeeById(filterId)"> 
+        <button class="btn btn-secondary ms-3" ng-click="findEmployeeName()"> 
             Cari
         </button>
     </div>

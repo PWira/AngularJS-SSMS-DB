@@ -1,5 +1,14 @@
 var app = angular.module('employeeApp', ['ngRoute']);
 
+// const rateLimit = require('express-rate-limit');
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 menit
+//     max: 100 // 100 req per IP
+// });
+
+// app.use('/api', limiter);
+
+
 app.config(function($locationProvider) {
     $locationProvider.html5Mode({
         enabled: true,
@@ -17,6 +26,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     $scope.currentPage = parseInt($location.search().page) || 1;
     $scope.limit = parseInt($location.search().limit) || 10;
+    $scope.searchName = $location.search().search || '';
     $scope.totalRecords = 0;
     $scope.totalPages = 1;
     $scope.pageNumbers = [];
@@ -29,25 +39,30 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
     };
 
     const updateURL = () => {
-        $location.search({
+        const params = {
             page: $scope.currentPage,
             limit: $scope.limit
-        });
+        };
+        if ($scope.searchName) {
+            params.search = $scope.searchName;
+        }
+        
+        $location.search(params);
     };
 
     const refreshData = () => {
-        EmployeeService.getAll($scope.currentPage, $scope.limit)
-            .then(res => { 
-                // format { data: [], totalRecords: X, totalPages: Y }
-                $scope.employees = res.data.data;
-                $scope.totalRecords = res.data.totalRecords;
-                $scope.totalPages = res.data.totalPages;
-                generatePageNumbers(); 
-            })
-            .catch(err => { 
-                console.error("Gagal memuat data:", err);
-                console.error("Error detail:", err.response);
-             });
+        const promise = $scope.searchName 
+            ? EmployeeService.search($scope.searchName, $scope.currentPage, $scope.limit)
+            : EmployeeService.getAll($scope.currentPage, $scope.limit);
+        
+        promise.then(res => { 
+            $scope.employees = res.data.data;
+            $scope.totalRecords = res.data.totalRecords;
+            $scope.totalPages = res.data.totalPages;
+            generatePageNumbers();
+        }).catch(err => { 
+            console.error("Gagal memuat data:", err); 
+        });
     };
 
     $scope.goToPage = (page) => {
@@ -64,22 +79,64 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         refreshData();
     };
 
-    $scope.showEmployeeById = (filterID) => {
-        if (!filterID) {
+    $scope.findEmployeeName = () => {
+        if (!$scope.searchName) {
             $scope.currentPage = 1;
+            $location.search({ page: 1, limit: $scope.limit });
             refreshData();
             return;
         }
-        EmployeeService.getById(filterID)
+        
+        $location.search({ search: $scope.searchName });
+
+        EmployeeService.search($scope.searchName)
             .then(res => {
-                $scope.employees = res.data ? [res.data] : [];
+                $scope.employees = res.data.data || res.data || [];
                 $scope.totalRecords = $scope.employees.length;
                 $scope.totalPages = 1;
                 $scope.pageNumbers = [1];
                 $scope.currentPage = 1;
             })
-            .catch(err => { console.error("Gagal memuat data:", err); });
+            .catch(err => { 
+                console.error("Gagal mencari data:", err);
+                alert("Data tidak ditemukan");
+            });
     };
+
+    $scope.clearSearch = () => {
+        $scope.searchName = '';
+        $scope.currentPage = 1;
+        $location.search({ page: 1, limit: $scope.limit });
+        refreshData();
+    };
+
+    // $scope.showEmployeeById = (filterID) => {
+    //     if (!filterID) {
+    //         $scope.currentPage = 1;
+    //         refreshData();
+    //         return;
+    //     }
+    //     EmployeeService.getById(filterID)
+    //         .then(res => {
+    //             $scope.employees = res.data ? [res.data] : [];
+    //             $scope.totalRecords = $scope.employees.length;
+    //             $scope.totalPages = 1;
+    //             $scope.pageNumbers = [1];
+    //             $scope.currentPage = 1;
+    //         })
+    //         .catch(err => { console.error("Gagal memuat data:", err); });
+    // };
+
+    const urlParams = $location.search();
+    if (urlParams.search) {
+        $scope.searchName = urlParams.search;
+        $scope.findEmployeeName();
+    } else {
+        if (!urlParams.page || !urlParams.limit) {
+            updateURL();
+        }
+        refreshData();
+    }
 
     // Form POST
     $scope.showAddForm = () => {
@@ -90,7 +147,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     // Form UPDATE
     $scope.showEditForm = (emp) => {
-    console.log("Employee to edit:", emp); // DEBUG
+    // console.log("Employee to edit:", emp); // DEBUG
     
     $scope.view = 'form';
     $scope.isEdit = true;
@@ -101,15 +158,15 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         Salary: emp.Salary
     };
     
-    console.log("Form after copy:", $scope.form); // DEBUG
+    // console.log("Form after copy:", $scope.form); // DEBUG
 };
     $scope.backToList = () => {
         $scope.view = 'list';
     };
 
     $scope.saveEmployee = () => {
-        console.log("Saving employee:", $scope.form); // DEBUG
-        console.log("Is Edit:", $scope.isEdit); // DEBUG
+        // console.log("Saving employee:", $scope.form); // DEBUG
+        // console.log("Is Edit:", $scope.isEdit); // DEBUG
         
         if ($scope.isEdit) {
             if (!$scope.form.EmployeeID) {
@@ -127,8 +184,8 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                     $scope.form = {};
                 })
                 .catch(err => {
-                    console.error("Update error:", err);
-                    alert("Gagal update: " + (err.data?.error || err.statusText));
+                    console.error("Update error:");
+                    // alert("Gagal update: " + (err.data?.error || err.statusText));
                 });
         } else {
             // CREATE
@@ -140,8 +197,8 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                     $scope.form = {}; // Reset
                 })
                 .catch(err => {
-                    console.error("Create error:", err);
-                    alert("Gagal tambah data: " + (err.data?.error || err.statusText));
+                    console.error("Create error:");
+                    // alert("Gagal tambah data: " + (err.data?.error || err.statusText));
                 });
         }
     };
@@ -153,9 +210,4 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             });
         }
     };
-
-    if (!$location.search().page || !$location.search().limit) {
-        updateURL();
-    }
-    refreshData();
 });

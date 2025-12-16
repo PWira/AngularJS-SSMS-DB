@@ -6,6 +6,9 @@ angular.module("employeeApp")
         getAll: function(page = 1, limit = 10) {
             return $http.get(`${API}?page=${page}&limit=${limit}`); 
         },
+        search: function(name) {
+            return $http.get(`${API}/search?name=${encodeURIComponent(name)}`);
+        },
         getById: function(id) {
             return $http.get(`${API}/${id}`);
         },
@@ -14,11 +17,11 @@ angular.module("employeeApp")
         },
         update: function(employee) {
             if (!employee || !employee.EmployeeID) {
-                console.error("Invalid employee data:", employee);
+                console.error("Invalid employee data:");
                 return Promise.reject({ message: "Employee ID is required" });
             }
             
-            console.log("Updating employee ID:", employee.EmployeeID); // DEBUG
+            // console.log("Updating employee ID:", employee.EmployeeID); // DEBUG
             
             return $http.put(`${API}/${employee.EmployeeID}`, {
                 Name: employee.Name,
