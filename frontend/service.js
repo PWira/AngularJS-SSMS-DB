@@ -1,5 +1,5 @@
 const API = "http://localhost:3000/api/employees";
-const API_KEY = "secret123";
+const API_KEY = "Backend_test_key_456";
 
 angular.module("employeeApp")
 .service("EmployeeService", function($http) {

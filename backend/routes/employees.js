@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { poolPromise, sql } = require("../db");
-const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/auth.js");
 
 router.use(authMiddleware);
 
@@ -45,6 +45,7 @@ router.get("/", async (req, res) => {
             currentPage: page,
             totalPages: Math.ceil(totalRecords / limit)
         });
+        console.log("Fetched employee data successfully");
 
     } catch (err) {
         console.error("Database error:"); 
@@ -81,6 +82,7 @@ router.get("/search", async (req, res) => {
         res.json({
             data: result.recordset
         });
+        console.log("Search completed successfully");
 
     } catch (err) {
         console.error("Search error:");
@@ -89,7 +91,7 @@ router.get("/search", async (req, res) => {
 });
 
 router.get("/department", async (req, res) => {
-    const Did = parseInt(req.params.Did);
+    const Did = parseInt(req.query.Did);
     if (isNaN(Did)) {
     return res.status(400).json({ error: "Invalid Department ID" });
     }
@@ -109,6 +111,7 @@ router.get("/department", async (req, res) => {
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
             WHERE e.DepartmentID = @Did`);
     res.json(result.recordset);
+    console.log("Fetched employees by department successfully");
     } catch (err) {
     res.status(500).json({ error: "Invalid Department ID" });
     }
@@ -136,6 +139,7 @@ router.get("/:id", async (req, res) => {
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
             WHERE EmployeeID = @id`);
     res.json(result.recordset[0]);
+    console.log("Fetched employee by ID successfully");
     } catch (err) {
     res.status(500).json({ error: "Invalid ID" });
     }
@@ -167,6 +171,7 @@ router.post("/", async (req, res) => {
                 `INSERT INTO Employees (Name, DepartmentID, Position, Salary) VALUES (@Name, @DepartmentID, @Position, @Salary); SELECT SCOPE_IDENTITY() AS EmployeeID;`
             );
         res.status(201).json({ EmployeeID: result.recordset[0].EmployeeID });
+        console.log("Inserted new employee successfully");
     } catch (err) {
         res.status(500).json({ error: "Data Tidak sesuai!" });
     }
@@ -192,6 +197,7 @@ router.put("/:id", async (req, res) => {
             "UPDATE Employees SET Name = @Name, DepartmentID = @DepartmentID, Position = @Position, Salary = @Salary WHERE EmployeeID = @id"
         );
     res.json({ message: "Employee updated successfully" });
+    console.log("Updated employee successfully");
     } catch (err) {
     res.status(500).json({ error: "Update data gagal" });
     }
@@ -210,6 +216,7 @@ router.delete("/:id", async (req, res) => {
         .input("id", sql.Int, id)
         .query("DELETE FROM Employees WHERE EmployeeID = @id");
     res.json({ message: "Employee deleted successfully" });
+    console.log("Deleted employee successfully");
     } catch (err) {
     res.status(500).json({ error: "Delete Data Gagal" });
     }

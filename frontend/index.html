@@ -29,8 +29,8 @@
         <label class="col-auto d-flex align-items-center ms-3"></label>
             <select ng-model="searchDepartmentID" ng-change="findEmployeesByDept(searchDepartmentID)">
                 <option value="">Sorting Menurut Department</option> 
-                <option value="1">Pemasaran</option>
-                <option value="2">Teknologi Informasi</option>
+                <option value=1>Pemasaran</option>
+                <option value=2>Teknologi Informasi</option>
                 <option value="3">Keuangan</option>
                 <option value="4">Sumber Daya Manusia</option>
                 <option value="5">Operasi</option>
@@ -102,9 +102,9 @@
     <h2 class="h4 mb-4">{{ isEdit ? 'Edit Employee' : 'Add Employee' }}</h2>
     
     <!-- Debug info -->
-    <div class="alert alert-info" ng-if="isEdit">
+    <!-- <div class="alert alert-info" ng-if="isEdit">
         <small>Editing Employee ID: {{ form.EmployeeID }}</small>
-    </div>
+    </div> -->
     
     <form ng-submit="saveEmployee()">
         <input type="hidden" ng-model="form.EmployeeID" ng-if="isEdit">
@@ -113,10 +113,11 @@
             <label class="form-label">Name</label>
             <input type="text" ng-model="form.Name" class="form-control" required>
         </div>
-        
+
         <div class="mb-3">
             <label class="form-label">Department</label>
             <select id="DepartmentID" ng-model="form.DepartmentID" class="form-select" required>
+                <option value="">-- Department --   </option>
                 <option value="1">Pemasaran</option>
                 <option value="2">Teknologi Informasi</option>
                 <option value="3">Keuangan</option>

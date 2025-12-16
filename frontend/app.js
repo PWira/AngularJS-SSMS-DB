@@ -4,7 +4,6 @@ app.config(function($httpProvider) {
     $httpProvider.interceptors.push(function() {
         return {
             request: function(config) {
-                config.headers['x-api-key'] = 'secret123';
                 return config;
             }
         };
@@ -62,7 +61,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             $scope.totalPages = res.data.totalPages;
             generatePageNumbers();
         }).catch(err => { 
-            console.error("Gagal memuat data:", err); 
+            console.error("Gagal memuat data:"); 
         });
     };
 
@@ -100,7 +99,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
                 $scope.currentPage = 1;
             })
             .catch(err => { 
-                console.error("Gagal mencari data:", err);
+                console.error("Gagal mencari data:");
                 alert("Data tidak ditemukan");
             });
     };
@@ -191,7 +190,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         if ($scope.isEdit) {
             if (!$scope.form.EmployeeID) {
                 alert("Error: Employee ID tidak ditemukan!");
-                console.error("Form data:", $scope.form);
+                console.error("Error: Employee ID tidak ditemukan!");
                 return;
             }
             
