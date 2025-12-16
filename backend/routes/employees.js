@@ -1,23 +1,12 @@
 const express = require("express");
-const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { poolPromise, sql } = require("../db");
+const authMiddleware = require("../middleware/auth");
 
-const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Unauthorized' });
-    
-    try {
-        const decoded = jwt.verify(token, 'SECRET_KEY');
-        req.user = decoded;
-        next();
-    } catch (err) {
-        res.status(403).json({ error: 'Invalid token' });
-    }
-};
+router.use(authMiddleware);
 
 // GET ALL WITH PAGINATION
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -55,7 +44,7 @@ router.get("/", authMiddleware, async (req, res) => {
     }
 });
 
-router.get("/search", authMiddleware, async (req, res) => {
+router.get("/search", async (req, res) => {
     const searchName = req.query.name || '';
     
     if (!searchName) {
@@ -83,7 +72,7 @@ router.get("/search", authMiddleware, async (req, res) => {
 });
 
 // GET BY ID
-router.get("/:id", authMiddleware, async (req, res) => {
+router.get("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
     return res.status(400).json({ error: "Invalid employee ID" });
@@ -101,7 +90,7 @@ router.get("/:id", authMiddleware, async (req, res) => {
 });
 
 // INSERT NEW EMPLOYEE
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", async (req, res) => {
     const { Name, Position, Salary } = req.body;
 
     if (!Name || Name.trim().length < 2) {
@@ -131,7 +120,7 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // UPDATE EMPLOYEE DATA
-router.put("/:id", authMiddleware, async (req, res) => {
+router.put("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     const { Name, Position, Salary } = req.body;
     if (isNaN(id)) {
@@ -155,7 +144,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 });
 
 // DELETE EMPLOYEE
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
     return res.status(400).json({ error: "Invalid employee ID" });

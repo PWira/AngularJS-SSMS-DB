@@ -1,19 +1,30 @@
+const API = "http://localhost:3000/api/employees";
+const API_KEY = "secret123";
+
 angular.module("employeeApp")
 .service("EmployeeService", function($http) {
     const API = "http://localhost:3000/api/employees";
 
     return {
         getAll: function(page = 1, limit = 10) {
-            return $http.get(`${API}?page=${page}&limit=${limit}`); 
+            return $http.get(`${API}?page=${page}&limit=${limit}`,{
+                headers: { 'x-api-key': API_KEY }
+            }); 
         },
         search: function(name) {
-            return $http.get(`${API}/search?name=${encodeURIComponent(name)}`);
+            return $http.get(`${API}/search?name=${encodeURIComponent(name)}`,{
+                headers: { 'x-api-key': API_KEY }
+            });
         },
         getById: function(id) {
-            return $http.get(`${API}/${id}`);
+            return $http.get(`${API}/${id}`,{
+                headers: { 'x-api-key': API_KEY }
+            });
         },
         create: function(employee) {
-            return $http.post(API, employee);
+            return $http.post(API, employee,{
+                headers: { 'x-api-key': API_KEY }
+            });
         },
         update: function(employee) {
             if (!employee || !employee.EmployeeID) {
@@ -27,10 +38,14 @@ angular.module("employeeApp")
                 Name: employee.Name,
                 Position: employee.Position,
                 Salary: employee.Salary
+            },{
+                headers: { 'x-api-key': API_KEY }
             });
         },
         delete: function(id) {
-            return $http.delete(`${API}/${id}`);
+            return $http.delete(`${API}/${id}`,{
+                headers: { 'x-api-key': API_KEY }
+            });
         }
     };
 });

@@ -1,10 +1,17 @@
 const express = require("express");
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const cors = require("cors");
 
 const app = express();
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 menit
+    max: 100 // 100 req per IP
+});
 app.use(cors());
 app.use(express.json());
+app.use('/api', limiter);
+
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 

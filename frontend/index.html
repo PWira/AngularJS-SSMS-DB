@@ -23,10 +23,10 @@
         <input type="text" 
             class="form-control" 
             placeholder="Cari nama pegawai..." 
-            ng-model="searchName"
-            ng-keyup="$event.keyCode == 13 && findEmployeeName()">
+            ng-model="name"
+            ng-keyup="$event.keyCode == 13 && findEmployeeName(name)">
 
-        <button class="btn btn-secondary ms-3" ng-click="findEmployeeName()"> 
+        <button class="btn btn-secondary ms-3" ng-click="findEmployeeName(name)"> 
             Cari
         </button>
     </div>

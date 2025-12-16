@@ -1,13 +1,15 @@
 var app = angular.module('employeeApp', ['ngRoute']);
 
-// const rateLimit = require('express-rate-limit');
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 menit
-//     max: 100 // 100 req per IP
-// });
-
-// app.use('/api', limiter);
-
+app.config(function($httpProvider) {
+    $httpProvider.interceptors.push(function() {
+        return {
+            request: function(config) {
+                config.headers['x-api-key'] = 'secret123';
+                return config;
+            }
+        };
+    });
+});
 
 app.config(function($locationProvider) {
     $locationProvider.html5Mode({
@@ -15,7 +17,6 @@ app.config(function($locationProvider) {
         requireBase: false
     });
 });
-
 app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     $scope.view = 'list';
@@ -79,7 +80,8 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         refreshData();
     };
 
-    $scope.findEmployeeName = () => {
+    $scope.findEmployeeName = (name) => {
+        $scope.searchName = name || "";
         if (!$scope.searchName) {
             $scope.currentPage = 1;
             $location.search({ page: 1, limit: $scope.limit });
