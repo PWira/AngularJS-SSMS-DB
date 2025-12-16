@@ -77,7 +77,7 @@ http://localhost:3000
 ├── frontend/
 │   ├── app.js              # Logic AngularJS (Controller & Service)
 │   ├── index.html          # Tampilan Utama
-│   └── style.css           # Styling Custom
+│   └── index.css           # Styling Custom
 └── .gitignore              # .gitignore
 ```
 

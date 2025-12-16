@@ -53,20 +53,31 @@ router.get("/", async (req, res) => {
     }
 });
 
+//GET SEARCH BY NAME
 router.get("/search", async (req, res) => {
     const searchName = req.query.name || '';
-    
-    if (!searchName) {
-        return res.status(400).json({ error: "Nama pencarian tidak boleh kosong" });
-    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     try {
         const pool = await poolPromise;
-        const request = pool.request();
         
-        request.input('searchName', sql.NVarChar, `%${searchName}%`);
+        // COUNT dengan filter
+        const countRequest = pool.request();
+        const countQuery = `
+            SELECT COUNT(*) AS totalRecords 
+            FROM Employees 
+            WHERE Name LIKE @searchName
+        `;
+        const totalResult = await countRequest
+            .input('searchName', sql.NVarChar, `%${searchName}%`)
+            .query(countQuery);
+        const totalRecords = totalResult.recordset[0].totalRecords;
         
-        const result = await request.query(`
+        // DATA dengan pagination
+        const dataRequest = pool.request();
+        const paginatedQuery = `
             SELECT 
                 e.EmployeeID,
                 e.Name,
@@ -76,31 +87,62 @@ router.get("/search", async (req, res) => {
                 e.Salary
             FROM Employees e
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            WHERE Name LIKE @searchName ORDER BY EmployeeID   
-        `);
+            WHERE Name LIKE @searchName 
+            ORDER BY EmployeeID
+            OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY
+        `;
+        
+        const dataResult = await dataRequest
+            .input('searchName', sql.NVarChar, `%${searchName}%`)
+            .input('offset', sql.Int, offset)
+            .input('limit', sql.Int, limit)
+            .query(paginatedQuery);
         
         res.json({
-            data: result.recordset
+            data: dataResult.recordset,
+            totalRecords: totalRecords,
+            currentPage: page,
+            totalPages: Math.ceil(totalRecords / limit)
         });
         console.log("Search completed successfully");
 
     } catch (err) {
-        console.error("Search error");
+        console.error("Search error:");
         res.status(500).json({ error: "Gagal mencari data" });
     }
 });
 
+// GET BY DEPARTMENT ID
 router.get("/department", async (req, res) => {
     const Did = parseInt(req.query.Did);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     if (isNaN(Did)) {
-    return res.status(400).json({ error: "Invalid Department ID" });
+        return res.status(400).json({ error: "Invalid Department ID" });
     }
+    
     try {
-    const pool = await poolPromise;
-    const result = await pool
-        .request()
-        .input("Did", sql.Int, Did)
-        .query(`SELECT 
+        const pool = await poolPromise;
+        
+        // COUNT dengan filter
+        const countRequest = pool.request();
+        const countQuery = `
+            SELECT COUNT(*) AS totalRecords 
+            FROM Employees
+            WHERE DepartmentID = @Did
+        `;
+        const totalResult = await countRequest
+            .input('Did', sql.Int, Did)
+            .query(countQuery);
+        const totalRecords = totalResult.recordset[0].totalRecords;
+        
+        // DATA dengan pagination
+        const dataRequest = pool.request();
+        const paginatedQuery = `
+            SELECT 
                 e.EmployeeID,
                 e.Name,
                 e.DepartmentID,
@@ -109,27 +151,58 @@ router.get("/department", async (req, res) => {
                 e.Salary
             FROM Employees e 
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            WHERE e.DepartmentID = @Did`);
-    res.json(result.recordset);
-    console.log("Fetched employees by department successfully");
+            WHERE e.DepartmentID = @Did
+            ORDER BY e.EmployeeID
+            OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY
+        `;
+        
+        const dataResult = await dataRequest
+            .input('Did', sql.Int, Did)
+            .input('offset', sql.Int, offset)
+            .input('limit', sql.Int, limit)
+            .query(paginatedQuery);
+        
+        res.json({
+            data: dataResult.recordset,
+            totalRecords: totalRecords,
+            currentPage: page,
+            totalPages: Math.ceil(totalRecords / limit)
+        });
+        console.log("Fetched employees by department successfully");
+        
     } catch (err) {
-    console.error("Error fetching by department");
-    res.status(500).json({ error: "Invalid Department ID" });
+        console.error("Error fetching by department:", err);
+        res.status(500).json({ error: "Failed to fetch employees" });
     }
 });
 
 // GET BY ID
 router.get("/:id", async (req, res) => {
     const id = parseInt(req.params.id);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
     if (isNaN(id)) {
     return res.status(400).json({ error: "Invalid employee ID" });
     }
     try {
-    const pool = await poolPromise;
-    const result = await pool
-        .request()
-        .input("id", sql.Int, id)
-        .query(`SELECT 
+        const pool = await poolPromise;
+        // COUNT dengan filter
+        const countRequest = pool.request();
+        const countQuery = `
+            SELECT COUNT(*) AS totalRecords FROM Employees
+            WHERE EmployeeID = @id
+        `;
+        const totalResult = await countRequest
+            .input("id",sql.Int, id)
+            .query(countQuery);
+        const totalRecords = totalResult.recordset[0].totalRecords;
+        
+        // DATA dengan pagination
+        const dataRequest = pool.request();
+        const paginatedQuery = `
+            SELECT 
                 e.EmployeeID,
                 e.Name,
                 e.DepartmentID,
@@ -138,8 +211,28 @@ router.get("/:id", async (req, res) => {
                 e.Salary
             FROM Employees e 
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            WHERE EmployeeID = @id`);
-    res.json(result.recordset[0]);
+            WHERE EmployeeID = @id
+        `;
+        
+        const dataResult = await dataRequest
+            .input("id", sql.Int, id)
+            .input('offset', sql.Int, offset)
+            .input('limit', sql.Int, limit)
+            .query(paginatedQuery);
+        
+        res.json({
+            data: dataResult.recordset,
+            totalRecords: totalRecords,
+            currentPage: page,
+            totalPages: Math.ceil(totalRecords / limit)
+        });
+        
+        res.json({
+            data: dataResult.recordset,
+            totalRecords: totalRecords,
+            currentPage: page,
+            totalPages: Math.ceil(totalRecords / limit)
+        });
     console.log("Fetched employee by ID successfully");
     } catch (err) {
     console.error("Error fetching by ID");

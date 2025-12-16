@@ -26,7 +26,8 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     $scope.currentPage = parseInt($location.search().page) || 1;
     $scope.limit = parseInt($location.search().limit) || 10;
-    $scope.searchName = $location.search().search || '';
+    $scope.searchName = $location.search().nama || '';
+    $scope.searchDepartmentID = $location.search().department || '';
     $scope.totalRecords = 0;
     $scope.totalPages = 1;
     $scope.pageNumbers = [];
@@ -44,7 +45,20 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             limit: $scope.limit
         };
         if ($scope.searchName) {
-            params.search = $scope.searchName;
+            params.nama = $scope.searchName;
+        }else if ($scope.searchDepartmentID) {
+            params.department = $scope.searchDepartmentID;
+        }else {
+            switch ($scope.isEdit) {
+                case true:
+                    params.editing = $scope.form.EmployeeID;
+                case false:
+                    params.add_new = "add_new";
+                case '':
+                    console.error("Undifined state");
+                    refreshData(); 
+                    break;
+            }
         }
         
         $location.search(params);
@@ -66,10 +80,48 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
     };
 
     $scope.goToPage = (page) => {
+        updateURL();
         if (page >= 1 && page <= $scope.totalPages) {
             $scope.currentPage = page;
-            updateURL();
-            refreshData();
+            $location.search({ 
+                ...$location.search(), 
+                page: page 
+            });
+            // DepartmentID search pagination
+            if ($scope.searchDepartmentID) {
+                EmployeeService.getDepartmentId($scope.searchDepartmentID, page, $scope.limit)
+                    .then(res => {
+                        $scope.employees = res.data.data || [];
+                        $scope.totalRecords = res.data.totalRecords;
+                        $scope.totalPages = res.data.totalPages;
+                        $scope.currentPage = res.data.currentPage;
+                        updateURL();
+                        generatePageNumbers();
+                    })
+                    .catch(err => {
+                        console.error("Error pagination:", err);
+                    });
+            } 
+            // Search by name pagination
+            else if ($scope.searchName) {
+                EmployeeService.search($scope.searchName, page, $scope.limit)
+                    .then(res => {
+                        $scope.employees = res.data.data || [];
+                        $scope.totalRecords = res.data.totalRecords;
+                        $scope.totalPages = res.data.totalPages;
+                        $scope.currentPage = res.data.currentPage;
+                        updateURL();
+                        generatePageNumbers();
+                    })
+                    .catch(err => {
+                        console.error("Error pagination:", err);
+                    });
+            }
+            // Normal pagination
+            else {
+                updateURL();
+                refreshData();
+            }
         }
     };
 
@@ -80,27 +132,30 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
     };
 
     $scope.findEmployeeName = (name) => {
-        $scope.searchName = (name) ? name.trim() : "";
+        $scope.searchName = (name) ? name : "";
         if (!$scope.searchName) {
             $scope.currentPage = 1;
             $location.search({ page: 1, limit: $scope.limit });
             refreshData();
             return;
         }
-        
-        $location.search({ search: $scope.searchName });
+        $scope.searchDepartmentID = "";
+        $scope.currentPage = 1;
+        updateURL();
 
-        EmployeeService.search($scope.searchName)
+        EmployeeService.search($scope.searchName, $scope.currentPage, $scope.limit)
             .then(res => {
-                $scope.employees = res.data.data || res.data || [];
-                $scope.totalRecords = $scope.employees.length;
-                $scope.totalPages = 1;
-                $scope.pageNumbers = [1];
-                $scope.currentPage = 1;
+                $scope.employees = res.data.data || [];
+                $scope.totalRecords = res.data.totalRecords;
+                $scope.totalPages = res.data.totalPages;
+                $scope.currentPage = res.data.currentPage;
+                updateURL();
+                generatePageNumbers();
             })
             .catch(err => { 
                 console.error("Gagal mencari data:");
                 alert("Data tidak ditemukan");
+                $scope.employees = [];
             });
     };
 
@@ -118,15 +173,22 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             refreshData();
             return;
         }
-        EmployeeService.getDepartmentId($scope.searchDepartmentID)
+        $scope.name = "";
+        $scope.searchName = "";
+        $scope.currentPage = 1;
+        updateURL();
+
+        EmployeeService.getDepartmentId($scope.searchDepartmentID, $scope.currentPage, $scope.limit)
             .then(res => {
-                $scope.employees = res.data || [];
-                $scope.totalRecords = $scope.employees.length;
-                $scope.currentPage = 1; 
-                $scope.totalPages = Math.ceil($scope.totalRecords / $scope.itemsPerPage);
-                $scope.pageNumbers = Array.from({length: $scope.totalPages}, (_, i) => i + 1);
+                $scope.employees = res.data.data || [];
+                $scope.totalRecords = res.data.totalRecords;
+                $scope.totalPages = res.data.totalPages;
+                $scope.currentPage = res.data.currentPage;
+                updateURL();
+                generatePageNumbers();
             })
             .catch(err => { console.error("Gagal memuat data:"); });
+            $scope.employees = [];
     };
 
     // $scope.showEmployeeById = (filterID) => {
@@ -167,6 +229,7 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
     // Form UPDATE
     $scope.showEditForm = (emp) => {
         // console.log("Employee to edit:", emp); // DEBUG
+        updateURL();
         $scope.view = 'form';
         $scope.isEdit = true;
         $scope.form = {

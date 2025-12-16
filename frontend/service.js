@@ -11,8 +11,8 @@ angular.module("employeeApp")
                 headers: { 'x-api-key': API_KEY }
             }); 
         },
-        search: function(name) {
-            return $http.get(`${API}/search?name=${encodeURIComponent(name)}`,{
+        search: function(name, page = 1, limit = 10) {
+            return $http.get(`${API}/search?name=${encodeURIComponent(name)}&page=${page}&limit=${limit}`, {
                 headers: { 'x-api-key': API_KEY }
             });
         },
@@ -21,8 +21,8 @@ angular.module("employeeApp")
                 headers: { 'x-api-key': API_KEY }
             });
         },
-        getDepartmentId: function(Did) {
-            return $http.get(`${API}/department?Did=${Did}`,{
+        getDepartmentId: function(Did, page = 1, limit = 10) {
+            return $http.get(`${API}/department?Did=${Did}&page=${page}&limit=${limit}`,{
                 headers: { 'x-api-key': API_KEY }
             });
         },
