@@ -48,17 +48,17 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
             params.nama = $scope.searchName;
         }else if ($scope.searchDepartmentID) {
             params.department = $scope.searchDepartmentID;
-        }else {
-            switch ($scope.isEdit) {
-                case true:
-                    params.editing = $scope.form.EmployeeID;
-                case false:
-                    params.add_new = "add_new";
-                case '':
-                    console.error("Undifined state");
-                    refreshData(); 
-                    break;
-            }
+        // }else {
+        //     switch ($scope.isEdit) {
+        //         case true:
+        //             params.editing = $scope.form.EmployeeID;
+        //         case false:
+        //             params.add_new = "add_new";
+        //         case '':
+        //             console.error("Undifined state");
+        //             refreshData(); 
+        //             break;
+        //     }
         }
         
         $location.search(params);

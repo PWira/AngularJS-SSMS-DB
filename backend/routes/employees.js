@@ -32,9 +32,14 @@ router.get("/", async (req, res) => {
                 e.Salary
             FROM Employees e
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            ORDER BY EmployeeID 
-            OFFSET @offset ROWS 
-            FETCH NEXT @limit ROWS ONLY
+            WHERE e.EmployeeID IN (
+                SELECT EmployeeID 
+                FROM Employees 
+                ORDER BY EmployeeID 
+                OFFSET @offset ROWS 
+                FETCH NEXT @limit ROWS ONLY
+            )
+            ORDER BY e.EmployeeID;
         `;
         
         const dataResult = await dataRequest.query(paginatedQuery);
@@ -63,7 +68,7 @@ router.get("/search", async (req, res) => {
     try {
         const pool = await poolPromise;
         
-        // COUNT dengan filter
+        // COUNT filter
         const countRequest = pool.request();
         const countQuery = `
             SELECT COUNT(*) AS totalRecords 
@@ -75,7 +80,7 @@ router.get("/search", async (req, res) => {
             .query(countQuery);
         const totalRecords = totalResult.recordset[0].totalRecords;
         
-        // DATA dengan pagination
+        // DATA pagination
         const dataRequest = pool.request();
         const paginatedQuery = `
             SELECT 
@@ -87,10 +92,14 @@ router.get("/search", async (req, res) => {
                 e.Salary
             FROM Employees e
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            WHERE Name LIKE @searchName 
-            ORDER BY EmployeeID
-            OFFSET @offset ROWS
-            FETCH NEXT @limit ROWS ONLY
+            WHERE e.EmployeeID IN (
+                SELECT EmployeeID 
+                FROM Employees 
+                WHERE Name LIKE @searchName
+                ORDER BY EmployeeID
+                OFFSET @offset ROWS 
+                FETCH NEXT @limit ROWS ONLY
+            )
         `;
         
         const dataResult = await dataRequest
@@ -127,7 +136,7 @@ router.get("/department", async (req, res) => {
     try {
         const pool = await poolPromise;
         
-        // COUNT dengan filter
+        // COUNT filter
         const countRequest = pool.request();
         const countQuery = `
             SELECT COUNT(*) AS totalRecords 
@@ -139,7 +148,7 @@ router.get("/department", async (req, res) => {
             .query(countQuery);
         const totalRecords = totalResult.recordset[0].totalRecords;
         
-        // DATA dengan pagination
+        // DATA pagination
         const dataRequest = pool.request();
         const paginatedQuery = `
             SELECT 
@@ -151,10 +160,14 @@ router.get("/department", async (req, res) => {
                 e.Salary
             FROM Employees e 
             LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID
-            WHERE e.DepartmentID = @Did
-            ORDER BY e.EmployeeID
-            OFFSET @offset ROWS
-            FETCH NEXT @limit ROWS ONLY
+            WHERE e.EmployeeID IN (
+                SELECT EmployeeID 
+                FROM Employees 
+                WHERE DepartmentID = @Did
+                ORDER BY EmployeeID
+                OFFSET @offset ROWS
+                FETCH NEXT @limit ROWS ONLY
+            )
         `;
         
         const dataResult = await dataRequest
@@ -188,7 +201,7 @@ router.get("/:id", async (req, res) => {
     }
     try {
         const pool = await poolPromise;
-        // COUNT dengan filter
+        // COUNT filter
         const countRequest = pool.request();
         const countQuery = `
             SELECT COUNT(*) AS totalRecords FROM Employees
@@ -199,7 +212,7 @@ router.get("/:id", async (req, res) => {
             .query(countQuery);
         const totalRecords = totalResult.recordset[0].totalRecords;
         
-        // DATA dengan pagination
+        // DATA pagination
         const dataRequest = pool.request();
         const paginatedQuery = `
             SELECT 
