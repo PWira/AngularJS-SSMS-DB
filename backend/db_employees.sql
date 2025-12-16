@@ -3,6 +3,9 @@ CREATE DATABASE db_employees;
 USE db_employees;
 GO
 
+USE master;
+GO
+
 CREATE TABLE Employees(
 	EmployeeID INT IDENTITY(1,1) PRIMARY KEY,
 	Name VARCHAR(100),
@@ -69,3 +72,4 @@ VALUES
 ('Zahra Aulia', 'Research Analyst', 9700000.00);
 
 SELECT * FROM Employees;
+

@@ -2,9 +2,8 @@ angular.module("employeeApp", [])
 .controller("EmployeeCtrl", function($scope, EmployeeService) {
 
     $scope.view = 'list';
-    $scope.sortKey = 'EmployeeID';
-    $scope.reverse = false;
     $scope.employees = [];
+    $scope.filterID = 0;
     $scope.form = {};
     $scope.isEdit = false;
 
@@ -15,15 +14,18 @@ angular.module("employeeApp", [])
     };
     refreshData();
 
-    $scope.idFilterFn = (employee) => {
-        if (!$scope.filterId) {
-            return true;
-        }
+    $scope.showEmployeeById = (filterID) => {
+    if (!filterID) {
+        refreshData();
+        return;
+    }
+    EmployeeService.getById(filterID)
+        .then(res => {
+            $scope.employees = res.data ? [res.data] : [];
+        })
+        .catch(err => { console.error("Gagal memuat data:", err); });
+};
 
-        const employeeIdStr = String(employee.EmployeeID);
-        const filterStr = String($scope.filterId);
-        return employeeIdStr.includes(filterStr);
-    };
 
     // Form POST
     $scope.showAddForm = () => {
