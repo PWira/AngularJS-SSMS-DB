@@ -26,9 +26,15 @@
             ng-model="name"
             ng-keyup="$event.keyCode == 13 && findEmployeeName(name)">
 
-        <button class="btn btn-secondary ms-3" ng-click="findEmployeeName(name)"> 
-            Cari
-        </button>
+        <label class="col-auto d-flex align-items-center ms-3"></label>
+            <select ng-model="searchDepartmentID" ng-change="findEmployeesByDept(searchDepartmentID)">
+                <option value="">Sorting Menurut Department</option> 
+                <option value="1">Pemasaran</option>
+                <option value="2">Teknologi Informasi</option>
+                <option value="3">Keuangan</option>
+                <option value="4">Sumber Daya Manusia</option>
+                <option value="5">Operasi</option>
+            </select>
     </div>
 
     <div class="col-auto">
@@ -46,17 +52,19 @@
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>ID</th>
+                    <!-- <th>ID</th> -->
                     <th>Name</th>
+                    <th>Department</th>
                     <th>Position</th>
                     <th>Salary</th>
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="e in employees">
-                    <td>{{ e.EmployeeID }}</td>
+                <tr ng-repeat="e in employees | filter: {DepartmentID: searchDepartmentID}">
+                    <!-- <td>{{ e.EmployeeID }}</td> -->
                     <td>{{ e.Name }}</td>
+                    <td>{{ e.DepartmentName }}</td>
                     <td>{{ e.Position }}</td>
                     <td>{{ e.Salary | currency:'Rp ' }}</td>
                     <td class="text-center">
@@ -93,18 +101,28 @@
 <div ng-if="view === 'form'" class="card p-4 shadow-sm">
     <h2 class="h4 mb-4">{{ isEdit ? 'Edit Employee' : 'Add Employee' }}</h2>
     
-    <!-- Debug info (hapus setelah fix) -->
+    <!-- Debug info -->
     <div class="alert alert-info" ng-if="isEdit">
         <small>Editing Employee ID: {{ form.EmployeeID }}</small>
     </div>
     
     <form ng-submit="saveEmployee()">
-        <!-- Hidden field untuk menyimpan EmployeeID -->
         <input type="hidden" ng-model="form.EmployeeID" ng-if="isEdit">
         
         <div class="mb-3">
             <label class="form-label">Name</label>
             <input type="text" ng-model="form.Name" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Department</label>
+            <select id="DepartmentID" ng-model="form.DepartmentID" class="form-select" required>
+                <option value="1">Pemasaran</option>
+                <option value="2">Teknologi Informasi</option>
+                <option value="3">Keuangan</option>
+                <option value="4">Sumber Daya Manusia</option>
+                <option value="5">Operasi</option>
+            </select>
         </div>
         <div class="mb-3">
             <label class="form-label">Position</label>

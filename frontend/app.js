@@ -112,6 +112,24 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         refreshData();
     };
 
+    $scope.findEmployeesByDept = (DepartmentID) => {
+        $scope.searchDepartmentID = DepartmentID || ""; 
+        if (!$scope.searchDepartmentID) {
+            $scope.currentPage = 1;
+            refreshData();
+            return;
+        }
+        EmployeeService.getDepartmentId($scope.searchDepartmentID)
+            .then(res => {
+                $scope.employees = res.data || [];
+                $scope.totalRecords = $scope.employees.length;
+                $scope.currentPage = 1; 
+                $scope.totalPages = Math.ceil($scope.totalRecords / $scope.itemsPerPage);
+                $scope.pageNumbers = Array.from({length: $scope.totalPages}, (_, i) => i + 1);
+            })
+            .catch(err => { console.error("Gagal memuat data:"); });
+    };
+
     // $scope.showEmployeeById = (filterID) => {
     //     if (!filterID) {
     //         $scope.currentPage = 1;
@@ -149,19 +167,19 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
 
     // Form UPDATE
     $scope.showEditForm = (emp) => {
-    // console.log("Employee to edit:", emp); // DEBUG
-    
-    $scope.view = 'form';
-    $scope.isEdit = true;
-    $scope.form = {
-        EmployeeID: emp.EmployeeID,
-        Name: emp.Name,
-        Position: emp.Position,
-        Salary: emp.Salary
+        // console.log("Employee to edit:", emp); // DEBUG
+        $scope.view = 'form';
+        $scope.isEdit = true;
+        $scope.form = {
+            EmployeeID: emp.EmployeeID,
+            DepartmentID: emp.DepartmentID ? emp.DepartmentID.toString() : "",
+            Name: emp.Name,
+            Position: emp.Position,
+            Salary: emp.Salary
+        };
+        
+        // console.log("Form after copy:", $scope.form); // DEBUG
     };
-    
-    // console.log("Form after copy:", $scope.form); // DEBUG
-};
     $scope.backToList = () => {
         $scope.view = 'list';
     };
@@ -213,3 +231,4 @@ app.controller("EmployeeCtrl", function($scope, EmployeeService, $location) {
         }
     };
 });
+

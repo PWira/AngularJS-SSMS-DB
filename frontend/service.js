@@ -21,6 +21,11 @@ angular.module("employeeApp")
                 headers: { 'x-api-key': API_KEY }
             });
         },
+        getDepartmentId: function(Did) {
+            return $http.get(`${API}/department?Did=${Did}`,{
+                headers: { 'x-api-key': API_KEY }
+            });
+        },
         create: function(employee) {
             return $http.post(API, employee,{
                 headers: { 'x-api-key': API_KEY }
@@ -36,6 +41,7 @@ angular.module("employeeApp")
             
             return $http.put(`${API}/${employee.EmployeeID}`, {
                 Name: employee.Name,
+                DepartmentID: employee.DepartmentID,
                 Position: employee.Position,
                 Salary: employee.Salary
             },{
